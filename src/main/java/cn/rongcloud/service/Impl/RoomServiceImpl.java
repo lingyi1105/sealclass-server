@@ -105,7 +105,11 @@ public class RoomServiceImpl implements RoomService {
             if (!isAudience) {
                 List<RoomMember> assistantList = roomMemberDao.findByRidAndRole(roomId, RoleEnum.RoleAssistant.getValue());
                 if (!assistantList.isEmpty()) {
-                    roleEnum = RoleEnum.RoleStudent;
+                    if (count == 1) {
+                        roleEnum = RoleEnum.RoleTeacher;
+                    } else {
+                        roleEnum = RoleEnum.RoleStudent;
+                    }
                 } else {
                     roleEnum = RoleEnum.RoleAssistant;
                 }
@@ -133,6 +137,13 @@ public class RoomServiceImpl implements RoomService {
         msg.setTimestamp(curTime);
         msg.setUserName(userName);
         imHelper.publishMessage(userId, roomId, msg);
+        if (roleEnum == RoleEnum.RoleTeacher) {
+            display = "display://type=1?userId=" + userId + "?uri=";
+            DisplayMessage displayMessage = new DisplayMessage(display);
+            roomDao.updateDisplayByRid(roomId, display);
+            imHelper.publishMessage(userId, roomId, displayMessage, 1);
+            log.info("joinRoom, display changed: roomId={}, {}, userId={}", roomId, display, userId);
+        }
 
         List<UserInfo> userInfoList = userDao.findByUid(userId);
         if (userInfoList.isEmpty()) {
@@ -295,8 +306,18 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public void destroyRoom(String roomId) {
         roomDao.deleteByRid(roomId);
-        roomMemberDao.deleteByRid(roomId);
         whiteboardDao.deleteByRid(roomId);
+
+        List<RoomMember> list = roomMemberDao.findByRid(roomId);
+        if (!list.isEmpty()) {
+            try {
+                imHelper.dismiss(list.get(0).getUid(), roomId);
+            } catch (Exception e) {
+                log.error("destroyRoom: {}", e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        roomMemberDao.deleteByRid(roomId);
         log.info("destroyRoom: {}", roomId);
     }
 
@@ -476,12 +497,10 @@ public class RoomServiceImpl implements RoomService {
             wb.setCreator(jwtUser.getUserId());
             wb.setCreateDt(date);
             wb.setCurPg(0);
-            String wbName = ((jwtUser.getUserId() + wbId).hashCode() & 0x7fffffff) + "";
-            wb.setName(wbName);
-            whiteboardDao.save(wb);
+            Whiteboard wbObj = whiteboardDao.save(wb);
             WhiteboardMessage wbmsg = new WhiteboardMessage(WhiteboardMessage.Create);
             wbmsg.setWhiteboardId(wbId);
-            wbmsg.setWhiteboardName(wbName);
+            wbmsg.setWhiteboardName("白板" + wbObj.getId());
             imHelper.publishMessage(jwtUser.getUserId(), roomId, wbmsg);
             String display = "display://type=2?userId=" + jwtUser.getUserId() + "?uri=" + wbId;
             roomDao.updateDisplayByRid(roomId, display);
@@ -541,7 +560,7 @@ public class RoomServiceImpl implements RoomService {
         List<RoomResult.WhiteboardResult> result = new ArrayList<>();
         for (Whiteboard wb : whiteboards) {
             RoomResult.WhiteboardResult r = new RoomResult.WhiteboardResult();
-            r.setName(wb.getName());
+            r.setName("白板" + wb.getId());
             r.setCurPg(wb.getCurPg());
             r.setWhiteboardId(wb.getWbid());
             result.add(r);
