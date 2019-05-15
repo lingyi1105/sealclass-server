@@ -1,6 +1,7 @@
 package cn.rongcloud.service.Impl;
 
 import cn.rongcloud.common.*;
+import cn.rongcloud.config.IMProperties;
 import cn.rongcloud.config.RoomProperties;
 import cn.rongcloud.dao.*;
 import cn.rongcloud.im.IMHelper;
@@ -10,6 +11,7 @@ import cn.rongcloud.permission.DeclarePermissions;
 import cn.rongcloud.pojo.*;
 import cn.rongcloud.service.RoomService;
 import cn.rongcloud.utils.CheckUtils;
+import cn.rongcloud.utils.CodeUtil;
 import cn.rongcloud.utils.DateTimeUtils;
 import cn.rongcloud.utils.IdentifierUtils;
 import cn.rongcloud.whiteboard.WhiteBoardHelper;
@@ -55,13 +57,16 @@ public class RoomServiceImpl implements RoomService {
     @Autowired
     private UserDao userDao;
 
+    @Autowired
+    private IMProperties imProperties;
+
     @Transactional
     @Override
-    public RoomResult joinRoom(String userName, String roomId, boolean isAudience, JwtUser jwtUser) throws ApiException, Exception {
+    public RoomResult joinRoom(String userName, String roomId, boolean isAudience, boolean isDisableCamera, JwtUser jwtUser) throws ApiException, Exception {
         CheckUtils.checkArgument(userName != null, "userName must't be null");
         CheckUtils.checkArgument(roomId != null, "roomId must't be null");
 
-        log.info("joinRoom: jwtUser={}, roomId={}, userName={}, isAudience={}", jwtUser, roomId, userName, isAudience);
+        log.info("joinRoom: jwtUser={}, roomId={}, userName={}, isAudience={}, isDisableCamera={}", jwtUser, roomId, userName, isAudience, isDisableCamera);
         String userId;
         if (jwtUser != null) {
             userId = jwtUser.getUserId();
@@ -75,11 +80,10 @@ public class RoomServiceImpl implements RoomService {
             userId = IdentifierUtils.uuid();
         }
 
-        String display;
+        String display = "";
         Date curTime = DateTimeUtils.currentUTC();
         List<Room> roomList = roomDao.findByRid(roomId);
         if (roomList.isEmpty()) {
-            display = "display://type=0?userId=" + userId + "?uri=";
             saveRoom(roomId, roomId, curTime, display);
             IMApiResultInfo resultInfo = imHelper.createGroup(new String[]{userId}, roomId, roomId);
             if (!resultInfo.isSuccess()) {
@@ -116,18 +120,19 @@ public class RoomServiceImpl implements RoomService {
             } else {
                 roleEnum = RoleEnum.RoleAudience;
             }
-            saveRoomMember(userId, userName, roomId, roleEnum.getValue(), curTime);
+            saveRoomMember(userId, userName, roomId, roleEnum.getValue(), !isDisableCamera, curTime);
             IMApiResultInfo resultInfo = imHelper.joinGroup(new String[]{userId}, roomId, roomId);
             if (!resultInfo.isSuccess()) {
                 throw new ApiException(ErrorEnum.ERR_CREATE_ROOM_ERROR, resultInfo.getErrorMessage());
             }
             userResult.setMicrophone(true);
-            userResult.setCamera(true);
+            userResult.setCamera(!isDisableCamera);
             userResult.setJoinTime(curTime);
             log.info("user join the room: roomId={} , userId={}, roleEnum={}, memCount: {}", roomId, userId, roleEnum, count);
         } else {
             roleEnum = RoleEnum.getEnumByValue(memberList.get(0).getRole());
-            roomResult.setDisplay(roomList.get(0).getDisplay());
+            roomMemberDao.updateCameraByRidAndUid(roomId, userId, !isDisableCamera);
+            userResult.setCamera(!isDisableCamera);
             userResult.setJoinTime(memberList.get(0).getJoinDt());
 
             log.info("user exist in the room: roomId={} , userId={}, use the last role={}", roomId, userId, roleEnum);
@@ -136,12 +141,15 @@ public class RoomServiceImpl implements RoomService {
         MemberChangedMessage msg = new MemberChangedMessage(MemberChangedMessage.Action_Join, userId, roleEnum.getValue());
         msg.setTimestamp(curTime);
         msg.setUserName(userName);
+        msg.setCamera(!isDisableCamera);
         imHelper.publishMessage(userId, roomId, msg);
         if (roleEnum == RoleEnum.RoleTeacher) {
             display = "display://type=1?userId=" + userId + "?uri=";
-            DisplayMessage displayMessage = new DisplayMessage(display);
-            roomDao.updateDisplayByRid(roomId, display);
-            imHelper.publishMessage(userId, roomId, displayMessage, 1);
+            updateDisplay(roomId, userId, display, 0);
+            log.info("joinRoom, display changed: roomId={}, {}, userId={}", roomId, display, userId);
+        } else if (roleEnum == RoleEnum.RoleAssistant && display.isEmpty()) {
+            display = "display://type=0?userId=" + userId + "?uri=";
+            updateDisplay(roomId, userId, display, 0);
             log.info("joinRoom, display changed: roomId={}, {}, userId={}", roomId, display, userId);
         }
 
@@ -194,15 +202,17 @@ public class RoomServiceImpl implements RoomService {
         room.setName(roomName);
         room.setCreateDt(createTime);
         room.setDisplay(display);
+        room.setWhiteboardNameIndex(0);
         roomDao.save(room);
     }
 
-    private void saveRoomMember(String userId, String userName, String roomId, int role, Date joinTime) {
+    private void saveRoomMember(String userId, String userName, String roomId, int role, boolean cameraOn, Date joinTime) {
         RoomMember roomMember = new RoomMember();
         roomMember.setUid(userId);
         roomMember.setName(userName);
         roomMember.setRid(roomId);
         roomMember.setRole(role);
+        roomMember.setCamera(cameraOn);
         roomMember.setJoinDt(joinTime);
         roomMemberDao.save(roomMember);
     }
@@ -229,21 +239,10 @@ public class RoomServiceImpl implements RoomService {
         int userRole = roomMemberList.get(0).getRole();
         log.info("leaveRoom: roomId={}, {}, role={}", roomId, jwtUser, RoleEnum.getEnumByValue(userRole));
 
-        if (userRole == RoleEnum.RoleTeacher.getValue()) {
-            if (!isTeacherDisplayWhiteboard(roomList.get(0), jwtUser.getUserId()) || !roomMemberDao.existsByRidAndRole(roomId, RoleEnum.RoleAssistant.getValue())) {
-                roomDao.updateDisplayByRid(roomId, "");
-                DisplayMessage displayMessage = new DisplayMessage("");
-                imHelper.publishMessage(jwtUser.getUserId(), roomId, displayMessage);
-                log.info("clear display cause teacher leave: roomId={}, {}", roomId, jwtUser);
-            } else {
-                log.info("don't update current display: room={}, role={}", roomList.get(0), RoleEnum.getEnumByValue(userRole));
-            }
-        } else if (userRole == RoleEnum.RoleAssistant.getValue()) {
-            if (isAssistantDisplay(roomList.get(0), jwtUser.getUserId())) {
-                roomDao.updateDisplayByRid(roomId, "");
-                DisplayMessage displayMessage = new DisplayMessage("");
-                imHelper.publishMessage(jwtUser.getUserId(), roomId, displayMessage);
-                log.info("clear display cause assistant leave: roomId={}, {}", roomId, jwtUser);
+        if (userRole == RoleEnum.RoleTeacher.getValue() || userRole == RoleEnum.RoleAssistant.getValue()) {
+            if (isUserDisplay(roomList.get(0), jwtUser.getUserId())) {
+                updateDisplay(roomId, jwtUser.getUserId(), "", 0);
+                log.info("clear display cause speaker leave: roomId={}, {}", roomId, jwtUser);
             } else {
                 log.info("don't update current display: room={}, role={}", roomList.get(0), RoleEnum.getEnumByValue(userRole));
             }
@@ -355,10 +354,8 @@ public class RoomServiceImpl implements RoomService {
                         log.info("change the role: {}, {}, {}, result: {}", roomId, jwtUser.getUserId(), changedRole, r);
                         result = true;
                     }
-                    if (oldUsers.get(0).getRole() == RoleEnum.RoleTeacher.getValue() && isTeacherDisplay(roomList.get(0), oldUsers.get(0).getUid())) {
-                        roomDao.updateDisplayByRid(roomId, "");
-                        DisplayMessage displayMessage = new DisplayMessage("");
-                        imHelper.publishMessage(jwtUser.getUserId(), roomId, displayMessage);
+                    if (oldUsers.get(0).getRole() == RoleEnum.RoleTeacher.getValue() && isUserDisplay(roomList.get(0), oldUsers.get(0).getUid())) {
+                        updateDisplay(roomId, jwtUser.getUserId(), "", 1);
                     } else {
                         log.info("don't update display: room={}, userRole={}", roomList.get(0), RoleEnum.getEnumByValue(oldUsers.get(0).getRole()));
                     }
@@ -399,10 +396,8 @@ public class RoomServiceImpl implements RoomService {
             Thread.sleep(50);
             log.info("published msg: {}, msg={}", jwtUser, msg);
             List<Room> roomList = roomDao.findByRid(roomId);
-            if (kickedUsers.get(0).getRole() == RoleEnum.RoleTeacher.getValue() && isTeacherDisplay(roomList.get(0), userId)) {
-                roomDao.updateDisplayByRid(roomId, "");
-                DisplayMessage displayMessage = new DisplayMessage("");
-                imHelper.publishMessage(jwtUser.getUserId(), roomId, displayMessage, 1);
+            if (kickedUsers.get(0).getRole() == RoleEnum.RoleTeacher.getValue() && isUserDisplay(roomList.get(0), userId)) {
+                updateDisplay(roomId, jwtUser.getUserId(), "", 1);
             } else {
                 log.info("don't update display: room={}, userRole={}", roomId, RoleEnum.getEnumByValue(kickedUsers.get(0).getRole()));
             }
@@ -490,17 +485,22 @@ public class RoomServiceImpl implements RoomService {
         if (resultInfo.isSuccess()) {
             String wbId = resultInfo.getData();
             Date date = DateTimeUtils.currentUTC();
+            List<Room> roomList = roomDao.findByRid(roomId);
+            int whiteboardNameIndex = roomList.get(0).getWhiteboardNameIndex() + 1;
+            String name = "白板" + whiteboardNameIndex;
+            roomDao.updateWhiteboardNameIndexByRid(roomId, whiteboardNameIndex);
             Whiteboard wb = new Whiteboard();
             wb.setRid(roomId);
             wb.setWbRoom(wbRoom);
             wb.setWbid(wbId);
+            wb.setName(name);
             wb.setCreator(jwtUser.getUserId());
             wb.setCreateDt(date);
             wb.setCurPg(0);
-            Whiteboard wbObj = whiteboardDao.save(wb);
+            whiteboardDao.save(wb);
             WhiteboardMessage wbmsg = new WhiteboardMessage(WhiteboardMessage.Create);
             wbmsg.setWhiteboardId(wbId);
-            wbmsg.setWhiteboardName("白板" + wbObj.getId());
+            wbmsg.setWhiteboardName(name);
             imHelper.publishMessage(jwtUser.getUserId(), roomId, wbmsg);
             String display = "display://type=2?userId=" + jwtUser.getUserId() + "?uri=" + wbId;
             roomDao.updateDisplayByRid(roomId, display);
@@ -560,7 +560,7 @@ public class RoomServiceImpl implements RoomService {
         List<RoomResult.WhiteboardResult> result = new ArrayList<>();
         for (Whiteboard wb : whiteboards) {
             RoomResult.WhiteboardResult r = new RoomResult.WhiteboardResult();
-            r.setName("白板" + wb.getId());
+            r.setName(wb.getName());
             r.setCurPg(wb.getCurPg());
             r.setWhiteboardId(wb.getWbid());
             result.add(r);
@@ -643,7 +643,7 @@ public class RoomServiceImpl implements RoomService {
         msg.setType(taskInfo.getTypeEnum().ordinal());
         msg.setOpUserId(jwtUser.getUserId());
         msg.setOpUserName(jwtUser.getUserName());
-        imHelper.publishMessage(jwtUser.getUserId(), taskInfo.getTargetUserId(), roomId, msg);
+        imHelper.publishMessage(jwtUser.getUserId(), taskInfo.getApplyUserId(), roomId, msg);
 
         DeviceStateChangedMessage deviceResourceMessage = new DeviceStateChangedMessage(taskInfo.getTypeEnum().ordinal(), taskInfo.isOnOff());
         deviceResourceMessage.setUserId(jwtUser.getUserId());
@@ -828,16 +828,14 @@ public class RoomServiceImpl implements RoomService {
             throw new ApiException(ErrorEnum.ERR_ROOM_NOT_EXIST);
         }
 
-        roomMemberDao.updateRoleByRidAndUid(roomId, jwtUser.getUserId(), RoleEnum.RoleStudent.getValue());
-        roomMemberDao.updateRoleByRidAndUid(roomId, userId, RoleEnum.RoleAssistant.getValue());
-
-        if (isAssistantDisplay(roomList.get(0), jwtUser.getUserId())) {
-            roomDao.updateDisplayByRid(roomId, "");
-            DisplayMessage displayMessage = new DisplayMessage("");
-            imHelper.publishMessage(jwtUser.getUserId(), roomId, displayMessage);
+        if (isUserDisplay(roomList.get(0), jwtUser.getUserId()) || isUserDisplay(roomList.get(0), userId)) {
+            updateDisplay(roomId, jwtUser.getUserId(), "", 1);
         } else {
             log.info("don't update display: room={}", roomList.get(0));
         }
+
+        roomMemberDao.updateRoleByRidAndUid(roomId, jwtUser.getUserId(), RoleEnum.RoleStudent.getValue());
+        roomMemberDao.updateRoleByRidAndUid(roomId, userId, RoleEnum.RoleAssistant.getValue());
 
         AssistantTransferMessage msg = new AssistantTransferMessage();
         msg.setOpUserId(jwtUser.getUserId());
@@ -1008,6 +1006,87 @@ public class RoomServiceImpl implements RoomService {
         return true;
     }
 
+   @Override
+    public Boolean memberOnlineStatus(List<ReqMemberOnlineStatus> statusList, String nonce, String timestamp, String signature) throws ApiException, Exception {
+        String sign = imProperties.getSecret() + nonce + timestamp;
+        String signSHA1 = CodeUtil.hexSHA1(sign);
+        if (!signSHA1.equals(signature)) {
+            log.info("memberOnlineStatus signature error");
+            return true;
+        }
+
+        for (ReqMemberOnlineStatus status : statusList) {
+            int s = Integer.parseInt(status.getStatus());
+            String userId = status.getUserId();
+
+            log.info("memberOnlineStatus, userId={}, status={}", userId, status);
+            //1：offline 离线； 0: online 在线
+            if (s == 1) {
+                List<RoomMember> members = roomMemberDao.findByUid(userId);
+                if (!members.isEmpty()) {
+                    scheduleManager.userIMOffline(userId);
+                }
+            } else if (s == 0) {
+                scheduleManager.userIMOnline(userId);
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public void userIMOfflineKick(String userId) {
+        List<RoomMember> members = roomMemberDao.findByUid(userId);
+        for (RoomMember member : members) {
+            int userRole = member.getRole();
+            log.info("userIMOfflineKick: roomId={}, {}, role={}", member.getRid(), userId, RoleEnum.getEnumByValue(userRole));
+            try {
+                if (userRole == RoleEnum.RoleTeacher.getValue() || userRole == RoleEnum.RoleAssistant.getValue()) {
+                    List<Room> rooms = roomDao.findByRid(member.getRid());
+                    if (rooms.isEmpty()) {
+                        break;
+                    }
+                    if (isUserDisplay(rooms.get(0), member.getUid())) {
+                        updateDisplay(member.getRid(), member.getUid(), "", 0);
+                        log.info("memberOnlineStatus offline: roomId={}, {}", member.getRid(), member.getUid());
+                    }
+                }
+                if (roomMemberDao.countByRid(member.getRid()) == 1) {
+                    IMApiResultInfo apiResultInfo = null;
+                    apiResultInfo = imHelper.dismiss(member.getUid(), member.getRid());
+                    if (apiResultInfo.getCode() == 200) {
+                        roomMemberDao.deleteUserByRidAndUid(member.getRid(), member.getUid());
+                        roomDao.deleteByRid(member.getRid());
+                        deleteWhiteboardByUser(member.getRid(), member.getUid());
+                        log.info("dismiss the room: {}", member.getRid());
+                    } else {
+                        log.error("{} exit {} room error: {}", member.getUid(), member.getRid(), apiResultInfo.getErrorMessage());
+                    }
+                } else {
+                    IMApiResultInfo apiResultInfo = null;
+                    apiResultInfo = imHelper.quit(new String[]{member.getUid()}, member.getRid());
+                    if (apiResultInfo.isSuccess()) {
+                        roomMemberDao.deleteUserByRidAndUid(member.getRid(), member.getUid());
+                        MemberChangedMessage msg = new MemberChangedMessage(MemberChangedMessage.Action_Leave, member.getUid(), userRole);
+                        msg.setUserName(member.getName());
+                        imHelper.publishMessage(member.getUid(), member.getRid(), msg);
+                        imHelper.quit(new String[]{member.getUid()}, member.getRid());
+                        log.info("quit group: roomId={}, {}", member.getRid(), member.getUid());
+                    } else {
+                        log.error("{} exit {} room error: {}", member.getUid(), member.getRid(), apiResultInfo.getErrorMessage());
+                    }
+                }
+                userDao.deleteByUid(member.getUid());
+            } catch (Exception e) {
+                log.error("userIMOfflineKick error: userId={}", userId);
+            }
+        }
+    }
+	private void updateDisplay(String roomId, String senderId, String display, Integer isIncludeSender) throws ApiException, Exception {
+        roomDao.updateDisplayByRid(roomId, display);
+        DisplayMessage displayMessage = new DisplayMessage(display);
+        imHelper.publishMessage(senderId, roomId, displayMessage, isIncludeSender);
+    }
     private boolean isTeacherDisplay(Room room, String userId) {
         return !room.getDisplay().isEmpty() && room.getDisplay().contains("userId=" + userId);
     }
@@ -1019,4 +1098,16 @@ public class RoomServiceImpl implements RoomService {
     private boolean isAssistantDisplay(Room room, String userId) {
         return !room.getDisplay().isEmpty() && room.getDisplay().contains("userId=" + userId);
     }
+
+    private boolean isUserDisplay(Room room, String userId) {
+        boolean result = false;
+        if (!room.getDisplay().isEmpty() && room.getDisplay().contains("userId=" + userId)) {
+            if (room.getDisplay().contains("type=0") || room.getDisplay().contains("type=1") || room.getDisplay().contains("type=3")) {
+                result = true;
+            }
+        }
+        return result;
+    }
+
+
 }

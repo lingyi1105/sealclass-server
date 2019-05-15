@@ -2,9 +2,7 @@ package cn.rongcloud.service;
 
 import cn.rongcloud.common.ApiException;
 import cn.rongcloud.common.JwtUser;
-import cn.rongcloud.pojo.DeviceTypeEnum;
-import cn.rongcloud.pojo.ReqChangeUserRoleData;
-import cn.rongcloud.pojo.RoomResult;
+import cn.rongcloud.pojo.*;
 
 import java.util.List;
 
@@ -13,7 +11,7 @@ import java.util.List;
  */
 public interface RoomService {
     //everyone
-    public RoomResult joinRoom(String userName, String roomId, boolean isAudience, JwtUser jwtUser) throws ApiException, Exception;
+    public RoomResult joinRoom(String userName, String roomId, boolean isAudience, boolean isDisableCamera, JwtUser jwtUser) throws ApiException, Exception;
 
     public Boolean leaveRoom(JwtUser jwtUser, String roomId) throws ApiException, Exception;
 
@@ -61,4 +59,6 @@ public interface RoomService {
     public Boolean changeRole(String roomId, String userId, int role, JwtUser jwtUser) throws ApiException, Exception;
 
     public void destroyRoom(String roomId);
+    public Boolean memberOnlineStatus(List<ReqMemberOnlineStatus> statusList, String nonce, String timestamp, String signature) throws ApiException, Exception;
+    public void userIMOfflineKick(String userId);
 }

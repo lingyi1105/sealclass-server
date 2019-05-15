@@ -11,4 +11,5 @@ public class ReqUserData {
     private String roomId;
     private String userId;
     private boolean audience;
+	private boolean disableCamera;
 }

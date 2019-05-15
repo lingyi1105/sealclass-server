@@ -17,7 +17,7 @@ public class Whiteboard implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private @Getter long id;
 
     private @Getter @Setter String rid;
     private @Getter @Setter String wbid;
