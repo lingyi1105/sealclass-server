@@ -7,9 +7,9 @@ import lombok.Data;
  */
 @Data
 public class JwtToken {
+    private String schoolId;
     private String tokenId;
     private String userId;
-    private String roomId;
     private String token;
     private long issuedTime;//UTC时间戳(ms)
     private long expiredTime;//UTC时间戳(ms)

@@ -19,7 +19,6 @@ public enum ErrorEnum {
     ERR_JOIN_ROOM_ERROR(12, "Join room error"),
     ERR_MESSAGE_ERROR(13, "IM Message send error"),
 
-
     //room error
     ERR_ROOM_NOT_EXIST(20, "Room not exist"),
     ERR_USER_NOT_EXIST_IN_ROOM(21, "User not exist in room"),
@@ -36,7 +35,16 @@ public enum ErrorEnum {
     ERR_TEACHER_EXIST_IN_ROOM(32, "Teacher exist in room"),
     ERR_DOWNGRADE_ROLE(33, "Can't downgrade role"),
     ERR_CHANGE_ROLE(34, "Only change student to teacher"),
+    ERR_STUDENT_FULL(35, "Class students are too many"),
 
+    //user error
+    ERR_USER_NOT_EXIST(40, "User or school not exist"),
+    ERR_USER_PASSWORD_ERROR(41, "User password error"),
+    ERR_USER_HAS_EXIST(42, "User has exist"),
+    ERR_USER_ROLE_ERROR(43, "User role error"),
+
+    //school error
+    ERR_SCHOOL_NOT_EXIST(50, "school not exist"),
     ;
 
     private @Getter int errCode;

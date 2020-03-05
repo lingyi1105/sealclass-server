@@ -51,7 +51,7 @@ public class JwtTokenHelper {
 
         JwtToken token = new JwtToken();
         token.setUserId(tokenData.getUserId());
-        token.setRoomId(tokenData.getRoomId());
+        token.setSchoolId(tokenData.getSchoolId());
         token.setTokenId(IdentifierUtils.uuid());
         token.setIssuedTime(System.currentTimeMillis());
         token.setExpiredTime(neverExpire ? -1 : token.getIssuedTime() + tokenTTLInMilliSec);

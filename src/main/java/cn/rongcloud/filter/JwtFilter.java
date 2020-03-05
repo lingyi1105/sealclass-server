@@ -58,13 +58,6 @@ public class JwtFilter extends GenericFilterBean {
             log.error("not found Authorization");
         }
 
-        String userAgent = httpReq.getHeader("user-agent");
-        log.info("the request UA: {}", userAgent);
-        if (null != userAgent) {
-            UserAgentTypeEnum type = UserAgentTypeEnum.getEnumByUserAgent(userAgent);
-            httpReq.setAttribute(USER_AGENT_TYPE, type);
-        }
-
-        chain.doFilter(req, res);
+        chain.doFilter(httpReq, res);
     }
 }

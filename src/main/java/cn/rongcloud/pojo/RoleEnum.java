@@ -10,10 +10,10 @@ import lombok.Setter;
  * Created by weiqinxiao on 2019/2/28.
  */
 public enum RoleEnum {
-    RoleAssistant("RoleAssistant", 1),
-    RoleTeacher("RoleTeacher", 2),
-    RoleStudent("RoleStudent", 3),
-    RoleAudience("RoleAudience", 4);
+    RoleSuperAdmin("RoleSuperAdmin", 1),
+    RoleAdmin("RoleAdmin", 2),
+    RoleTeacher("RoleTeacher", 10),
+    RoleStudent("RoleStudent", 20);
 
     private @Getter
     @Setter(AccessLevel.PRIVATE) String msg;
@@ -33,5 +33,14 @@ public enum RoleEnum {
         }
 
         throw new ApiException(ErrorEnum.ERR_REQUEST_PARA_ERR, v + " not valid role");
+    }
+
+    public static boolean isValid(int v) {
+        for(RoleEnum item : RoleEnum.values()) {
+            if(item.getValue() == v) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -118,8 +118,7 @@ public class HttpHelper {
         return conn;
     }
 
-    public HttpURLConnection createCommonPostHttpConnection(String host, String appKey,
-        String appSecret, String uri, String contentType)
+    public HttpURLConnection createCommonPostHttpConnection(String host, String appKey, String appSecret, String uri, String contentType)
         throws MalformedURLException, IOException, ProtocolException {
         String nonce = String.valueOf(Math.random() * 1000000);
         String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
@@ -149,8 +148,7 @@ public class HttpHelper {
         return conn;
     }
 
-    public HttpURLConnection createCommonGetHttpConnection(String host, String appKey,
-        String appSecret, String uri, String contentType)
+    public HttpURLConnection createCommonGetHttpConnection(String host, String appKey, String appSecret, String uri, String contentType)
         throws MalformedURLException, IOException, ProtocolException {
         String nonce = String.valueOf(Math.random() * 1000000);
         String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
@@ -180,18 +178,14 @@ public class HttpHelper {
         return conn;
     }
 
-    public HttpURLConnection createIMGetHttpConnection(String uri, String contentType)
+    public HttpURLConnection createIMGetHttpConnection(String appkey, String secret, String uri, String contentType)
         throws MalformedURLException, IOException, ProtocolException {
-        return createCommonGetHttpConnection(imProperties.getHost(),
-            imProperties.getAppKey(), imProperties.getSecret(), uri,
-            contentType);
+        return createCommonGetHttpConnection(imProperties.getHost(), appkey, secret, uri, contentType);
     }
 
-    public HttpURLConnection createIMPostHttpConnection(String uri, String contentType)
+    public HttpURLConnection createIMPostHttpConnection(String appkey, String secret, String uri, String contentType)
         throws MalformedURLException, IOException, ProtocolException {
-        return createCommonPostHttpConnection(imProperties.getHost(),
-                imProperties.getAppKey(), imProperties.getSecret(), uri,
-            contentType);
+        return createCommonPostHttpConnection(imProperties.getHost(), appkey,secret, uri, contentType);
     }
 
     public byte[] readInputStream(InputStream inStream) throws Exception {

@@ -1,288 +1,966 @@
 {
 	"info": {
-		"_postman_id": "0fc5c08c-3abb-4d05-9f30-d836457196b9",
-		"name": "SealClass copy",
+		"_postman_id": "d69eacfc-d6b9-4139-8269-27a088d18794",
+		"name": "SealClass",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "join",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"roomId\": \"class222\", \"audience\": true, \"userName\": \"u10\"}"
-				},
-				"url": {
-					"raw": "{{sealclass_url}}/room/join",
-					"host": [
-						"{{sealclass_url}}"
-					],
-					"path": [
-						"room",
-						"join"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "leave",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyb25nY2xvdWQiLCJqdGkiOiJpMGRIZk9aaFNlMHBHWlJMQ2libVdBIiwiaWF0IjoxNTUyMjkwNzY1LCJtYXJrIjoi55K-4o2E776K46qN4LS55p-y7Y2h46215LKx4Zix6qCb6JyV5ben4q2s4aOA4oeqIiwiZGF0YSI6IntcImRldmljZVR5cGVcIjowLFwicm9sZUlkXCI6MSxcInVzZXJJZFwiOlwidXNlcklkX3RlYWNoZXJcIn0ifQ.IVpFbQDQgecm_APor7SW7hZPPSEpdoPeYRFdp_sE23c",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"roomId\": \"roomId_111\"}"
-				},
-				"url": {
-					"raw": "{{sealclass_url}}/room/leave",
-					"host": [
-						"{{sealclass_url}}"
-					],
-					"path": [
-						"room",
-						"leave"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "refresh-token",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Authorization",
-						"value": "{{teacher_auth}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"userId\": \"userId_wei\", \"name\": \"wei\"}"
-				},
-				"url": {
-					"raw": "{{sealclass_url}}/user/refresh-token",
-					"host": [
-						"{{sealclass_url}}"
-					],
-					"path": [
-						"user",
-						"refresh-token"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "change-role",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Authorization",
-						"value": "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyb25nY2xvdWQiLCJqdGkiOiJwa2ZTam9HRVNpTXQxSFVJdUZVSWl3IiwiaWF0IjoxNTUyNDUxNzg4LCJtYXJrIjoi4q2X6Jid5pG34Ymm6LyF6Zm96YiL4pSf57G-7ZGE746W57Kf7KWO6bGP4aic4rSTIiwiZGF0YSI6IntcImRldmljZVR5cGVcIjowLFwicm9vbUlkXCI6XCJoZWxsb1wiLFwidXNlcklkXCI6XCJ0XzFcIn0ifQ.s7OdNMvzaswMwTVxLzxOOrnKFc1OAS6UaD1kGY7J_48",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"roomId\": \"hello\", \"users\": [{\"userId\": \"t_1\", \"role\": 2}, {\"userId\": \"u_1\", \"role\": 2}]}"
-				},
-				"url": {
-					"raw": "{{sealclass_url}}/room/change-role",
-					"host": [
-						"{{sealclass_url}}"
-					],
-					"path": [
-						"room",
-						"change-role"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "kick",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"type": "text",
-						"value": "{{assistant_auth}}"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"roomId\": \"roomId_111\", \"userId\": \"userId_student\"}"
-				},
-				"url": {
-					"raw": "{{sealclass_url}}/room/kick",
-					"host": [
-						"{{sealclass_url}}"
-					],
-					"path": [
-						"room",
-						"kick"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "whiteboard/create",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Authorization",
-						"value": "{{teacher_auth}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"roomId\": \"class222\"}"
-				},
-				"url": {
-					"raw": "{{sealclass_url}}/room/whiteboard/create",
-					"host": [
-						"{{sealclass_url}}"
-					],
-					"path": [
-						"room",
-						"whiteboard",
-						"create"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "whiteboard/delete",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Authorization",
-						"value": "{{teacher_auth}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"roomId\": \"roomId_wei\", \"whiteboardId\": \"http://120.92.85.162/ewbweb/blink-wb.html?roomKey=c9kqb3rdkbb8jYVWuHEumQesle-M0CQHJ20&token=eyJhbGciOiJIUzUxMiJ9.eyJyb29tS2V5IjoiYzlrcWIzcmRrYmI4allWV3VIRXVtUWVzbGUtTTBDUUhKMjAiLCJleHAiOjE1NTIzNzAxNzZ9.LGkpiR5jqRc805h7vhF_9ZwZPGH2nzujLeBC9A3MHUumTNfNU0zwTVFa84SCvvMzwR4pBHVSEsH5i6HgECz80g\"}\n"
-				},
-				"url": {
-					"raw": "{{sealclass_url}}/room/whiteboard/delete",
-					"host": [
-						"{{sealclass_url}}"
-					],
-					"path": [
-						"room",
-						"whiteboard",
-						"delete"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "whiteboard/list",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					},
-					{
-						"key": "Authorization",
-						"value": "{{teacher_auth}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
-				"url": {
-					"raw": "{{sealclass_url}}/room/whiteboard/list?roomId=roomId_111",
-					"host": [
-						"{{sealclass_url}}"
-					],
-					"path": [
-						"room",
-						"whiteboard",
-						"list"
-					],
-					"query": [
-						{
-							"key": "roomId",
-							"value": "roomId_111"
+			"name": "user",
+			"item": [
+				{
+					"name": "/user/login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{teacher_auth}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"password\": \"superadmin\",\n  \"phone\": \"10086\",\n  \"role\": 1,\n  \"schoolId\":\"rongcloud\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/user/login",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"user",
+								"login"
+							]
 						}
-					]
+					},
+					"response": []
+				},
+				{
+					"name": "/user/logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{superadmin_auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"password\": \"superadmin\",\n  \"phone\": \"18611934130\",\n  \"role\": 1,\n  \"schoolId\": \"rongcloud\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/user/logout",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"user",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/user/create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{superadmin_auth}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"s29\",\n  \"password\": \"123456\",\n  \"phone\": \"15810530029\",\n  \"portrait\": null,\n  \"role\": 20,\n  \"schoolId\": \"t8rfdx\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/user/create",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"user",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/user/refresh-token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{teacher_auth}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/user/refresh-token",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"user",
+								"refresh-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/user/delete",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{superadmin_auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"admin\",\n  \"password\": \"admin\",\n  \"phone\": \"15810530420\",\n  \"portrait\": null,\n  \"role\": 2,\n  \"schoolId\": \"SkQZyU\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/user/delete?userId=273b502a1803445cb2d090ae3077d29a",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"user",
+								"delete"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "273b502a1803445cb2d090ae3077d29a"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/user/detail",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{superadmin_auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/user/detail?userId=273b502a1803445cb2d090ae3077d29a",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"user",
+								"detail"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "273b502a1803445cb2d090ae3077d29a"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/user/list",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{superadmin_auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/user/list",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"user",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/user/modify",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{superadmin_auth}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"admin\",\n  \"password\": \"admin\",\n  \"phone\": \"15810530422\",\n  \"portrait\": null,\n  \"role\": 2,\n  \"schoolId\": \"SkQZyU\",\n  \"userId\": \"273b502a1803445cb2d090ae3077d29a\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/user/modify",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"user",
+								"modify"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "room",
+			"item": [
+				{
+					"name": "/room/join",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{teacher_auth}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"disableCamera\": false,\n  \"password\": \"15810530020\",\n  \"phone\": \"15810530020\",\n  \"role\": 20,\n  \"roomId\": \"room001\",\n  \"schoolId\": \"Pcz2to\"\n}\n"
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/room/join",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"room",
+								"join"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/room/leave",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{teacher_auth}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"roomId\": \"room001\",\n\t\"schoolId\": \"t8rfdx\"\n}"
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/room/leave",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"room",
+								"leave"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/room/destroy",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyb25nY2xvdWQiLCJqdGkiOiJscnpGaE1nc1J0NGtaOFJ4SkhjSUx3IiwiaWF0IjoxNTgxNzYwNjY2LCJtYXJrIjoi6oiM4ZKQ5ayL44mx6Y2G44iM65eF4byR7Y2f5JeM3YbllIzgv5HqlIrgp7LuuLwiLCJkYXRhIjoie1wiYXBwa2V5XCI6XCJjOWtxYjNyZGtiYjhqXCIsXCJwaG9uZVwiOlwiMTU4MTA1MzAwMTBcIixcInJvbGVcIjoxMCxcInNjaG9vbElkXCI6XCJ0OHJmZHhcIixcInNlY3JldFwiOlwiT1lqemRyeE1tVU9tcVwiLFwidXNlcklkXCI6XCI1MmI4MWI5OTFiOTg0ZjI3YjE3NTZhYTM0ZTk2Mzg1N1wiLFwidXNlck5hbWVcIjpcInQxMFwifSJ9.DskzjymO_iHWlmmRJpdN0RIahRZUwy5BmYa1l9pgWg8"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"roomId\": \"room001\",\n\t\"schoolId\": \"t8rfdx\"\n}"
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/room/destroy",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"room",
+								"destroy"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/room/kick",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{teacher_auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"roomId\": \"room001\",\n    \"userId\": \"52b81b991b984f27b1756aa34e963857\"\n}"
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/room/kick",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"room",
+								"kick"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "school",
+			"item": [
+				{
+					"name": "/school/create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{superadmin_auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"appkey\": \"AAAAAAAA\",\n  \"manager\": null,\n  \"name\": \"dev\",\n  \"portrait\": null,\n  \"schoolId\": null,\n  \"secret\": \"SSSSSSSSSSSS\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/school/create",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"school",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/school/delete",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{superadmin_auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/school/delete?schoolId=eFbnMk",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"school",
+								"delete"
+							],
+							"query": [
+								{
+									"key": "schoolId",
+									"value": "eFbnMk"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/school/detail",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{superadmin_auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/school/detail?schoolId=eFbnMk",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"school",
+								"detail"
+							],
+							"query": [
+								{
+									"key": "schoolId",
+									"value": "eFbnMk"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/school/list",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{superadmin_auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/school/list",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"school",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/school/modify",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{superadmin_auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"appkey\": \"AAAAAAAAA\",\n  \"manager\": \"5ff0a23d328646acb22230d4c7111c2a\",\n  \"name\": \"dev\",\n  \"portrait\": \"1234\",\n  \"schoolId\": \"t8rfdx\",\n  \"secret\": \"SSSSSSSSSS\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/school/modify",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"school",
+								"modify"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "whiteboard",
+			"item": [
+				{
+					"name": "/whiteboard/create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{teacher_auth}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"roomId\": \"room001\"\n}"
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/room/whiteboard/create",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"room",
+								"whiteboard",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/whiteboard/delete",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{teacher_auth}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"roomId\": \"room001\",\n    \"whiteboardId\": \"https://sealclass.rongcloud.cn/wb/wb.html?roomKey=c9kqb3rdkbb8jSK5IRKTnQX8iJfV1Fn24jA&token=eyJhbGciOiJIUzUxMiJ9.eyJyb29tS2V5IjoiYzlrcWIzcmRrYmI4alNLNUlSS1RuUVg4aUpmVjFGbjI0akEiLCJleHAiOjE1ODE4NzAwMjJ9.bM-WGqa_qKo3eUSiDhcPE6z4kFxa75uPrHJQ0tuuf19-ivtIHHyy_VtUmHjRqgGvfSXYqdISZd4gJ6zLfljYhA\"\n}"
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/room/whiteboard/delete",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"room",
+								"whiteboard",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/whiteboard/list",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{teacher_auth}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/room/whiteboard/list?roomId=room001",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"room",
+								"whiteboard",
+								"list"
+							],
+							"query": [
+								{
+									"key": "roomId",
+									"value": "room001"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "device",
+			"item": [],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "appversion",
+			"item": [
+				{
+					"name": "/appversion/update",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{superadmin_auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"platform\": 1,\n  \"url\": \"http://www.baidu2.com\",\n  \"version\": \"2.1.1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/appversion/update",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"appversion",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/appversion/delete",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{superadmin_auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"platform\": 1,\n  \"url\": \"string\",\n  \"version\": \"string\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/appversion/delete?platform=1",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"appversion",
+								"delete"
+							],
+							"query": [
+								{
+									"key": "platform",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/appversion/latest",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"type": "text",
+								"value": "{{superadmin_auth}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"platform\": 1,\n  \"url\": \"string\",\n  \"version\": \"string\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{sealclass_url}}/appversion/latest?platform=1",
+							"host": [
+								"{{sealclass_url}}"
+							],
+							"path": [
+								"appversion",
+								"latest"
+							],
+							"query": [
+								{
+									"key": "platform",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "/device/control",
@@ -432,41 +1110,6 @@
 			"response": []
 		},
 		{
-			"name": "apply",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"type": "text",
-						"value": "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyb25nY2xvdWQiLCJqdGkiOiJ2WjZudnJvMVFjWXJCSXFCeGozNGQ0IiwiaWF0IjoxNTUyNjMxMDY4LCJtYXJrIjoi556h4our7pCh4Kiz5KCb6YKt6Zqz472S76S_7oOB65267Yi65ICp7Y656p-o4bmTIiwiZGF0YSI6IntcImRldmljZVR5cGVcIjowLFwicm9vbUlkXCI6XCJjbGFzczExMVwiLFwidXNlcklkXCI6XCJEWDJCOHoyU1RkQWt1N1RKZTBCWXl3XCIsXCJ1c2VyTmFtZVwiOlwidTZcIn0ifQ.mLfg9eyiC62ho7pRdiRrDbxxRtoIY7BX43ivjpytBy8"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"roomId\": \"class111\"}"
-				},
-				"url": {
-					"raw": "{{sealclass_url}}/room/speech/apply",
-					"host": [
-						"{{sealclass_url}}"
-					],
-					"path": [
-						"room",
-						"speech",
-						"apply"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "approve",
 			"request": {
 				"method": "POST",
@@ -535,179 +1178,6 @@
 			"response": []
 		},
 		{
-			"name": "upgrade/invite",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"type": "text",
-						"value": "{{assistant_auth}}"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"roomId\": \"class222\", \"userId\": \"uG-F7n3MTOsu3sX9UNpNyg\", \"role\": 3}"
-				},
-				"url": {
-					"raw": "{{sealclass_url}}/room/upgrade/invite",
-					"host": [
-						"{{sealclass_url}}"
-					],
-					"path": [
-						"room",
-						"upgrade",
-						"invite"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "transfer",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"type": "text",
-						"value": "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyb25nY2xvdWQiLCJqdGkiOiJ2X0RFMy1lRVR4MHJ4eEE5SU1sUDlZIiwiaWF0IjoxNTUyNTM3MTIwLCJtYXJrIjoi7qmp75SI7IaT7LON4YCQ5b2156--5bKI6LWC7L2R4aWf6be965u97Iih54mV56apIiwiZGF0YSI6IntcImRldmljZVR5cGVcIjowLFwicm9vbUlkXCI6XCJoZWxsbzFcIixcInVzZXJJZFwiOlwiaGl2dlVSNVVTb3Nwa2xIY1lRQ2Q1VVwiLFwidXNlck5hbWVcIjpcImFfMVwifSJ9.orsCMeBH1EzFIYBEu18_q-T71V6Pxh_cuItjKrMebe4"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"roomId\": \"hello1\", \"userId\": \"VeDKs_GpQcEorppEiS0Hv8\"}"
-				},
-				"url": {
-					"raw": "{{sealclass_url}}/room/transfer",
-					"host": [
-						"{{sealclass_url}}"
-					],
-					"path": [
-						"room",
-						"transfer"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "downgrade",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"type": "text",
-						"value": "{{assistant_auth}}"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"roomId\": \"class111\", \"users\": [{\"userId\": \"jJmVx9GSQe4kKV9K3iS3tA\", \"role\": 4}]}"
-				},
-				"url": {
-					"raw": "{{sealclass_url}}/room/downgrade",
-					"host": [
-						"{{sealclass_url}}"
-					],
-					"path": [
-						"room",
-						"downgrade"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "upgrade/approve",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"type": "text",
-						"value": "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyb25nY2xvdWQiLCJqdGkiOiJsaWw4UlRPQVR3RWljYklZSlVCX0o4IiwiaWF0IjoxNTUyOTE1NTEyLCJtYXJrIjoi5ZiU76Gi7Yii5aal3Ifvl5fVneStguqUueGHht2_57GG5ZmZ4pKX5ryJ476oIiwiZGF0YSI6IntcImRldmljZVR5cGVcIjowLFwicm9vbUlkXCI6XCJjbGFzczIyMlwiLFwidXNlcklkXCI6XCJ1Ry1GN24zTVRPc3Uzc1g5VU5wTnlnXCIsXCJ1c2VyTmFtZVwiOlwidThcIn0ifQ.uVWysobyB5k2YdnZRoVig3XvsLPC_iQMMz3QGtPDcaA"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"roomId\": \"class222\", \"ticket\": \"RJ_53WZeTmYlno9BBwJW-8\"}"
-				},
-				"url": {
-					"raw": "{{sealclass_url}}/room/upgrade/approve",
-					"host": [
-						"{{sealclass_url}}"
-					],
-					"path": [
-						"room",
-						"upgrade",
-						"approve"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "upgrade/reject",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"type": "text",
-						"value": "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJyb25nY2xvdWQiLCJqdGkiOiJsaWw4UlRPQVR3RWljYklZSlVCX0o4IiwiaWF0IjoxNTUyOTE1NTEyLCJtYXJrIjoi5ZiU76Gi7Yii5aal3Ifvl5fVneStguqUueGHht2_57GG5ZmZ4pKX5ryJ476oIiwiZGF0YSI6IntcImRldmljZVR5cGVcIjowLFwicm9vbUlkXCI6XCJjbGFzczIyMlwiLFwidXNlcklkXCI6XCJ1Ry1GN24zTVRPc3Uzc1g5VU5wTnlnXCIsXCJ1c2VyTmFtZVwiOlwidThcIn0ifQ.uVWysobyB5k2YdnZRoVig3XvsLPC_iQMMz3QGtPDcaA"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"roomId\": \"class222\", \"ticket\": \"igUiAM3jTPYkVAMNYM3EQM\"}"
-				},
-				"url": {
-					"raw": "{{sealclass_url}}/room/upgrade/reject",
-					"host": [
-						"{{sealclass_url}}"
-					],
-					"path": [
-						"room",
-						"upgrade",
-						"reject"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "/device/sync",
 			"request": {
 				"method": "POST",
@@ -742,5 +1212,6 @@
 			},
 			"response": []
 		}
-	]
+	],
+	"protocolProfileBehavior": {}
 }

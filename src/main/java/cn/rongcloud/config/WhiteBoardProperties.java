@@ -12,4 +12,6 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "cn.rongcloud.whiteboard")
 public class WhiteBoardProperties {
     private String host;
+    private String origin;
+    private String replace;
 }

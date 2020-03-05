@@ -14,21 +14,21 @@ import java.util.List;
  */
 @Repository
 public interface RoomDao extends JpaRepository<Room, Long> {
-    public List<Room> findByRid(String rid);
+    List<Room> findByRidAndSid(String rid, String sid);
 
     @Transactional
     @Modifying
-    public int deleteByRid(String rid);
+    int deleteByRidAndSid(String rid, String sid);
 
-    public boolean existsByRid(String rid);
-
-    @Transactional
-    @Modifying
-    @Query(value = "update t_room set display=?2 where rid=?1", nativeQuery = true)
-    public int updateDisplayByRid(String rid, String display);
+    boolean existsByRidAndSid(String rid, String sid);
 
     @Transactional
     @Modifying
-    @Query(value = "update t_room set whiteboard_name_index=?2 where rid=?1", nativeQuery = true)
-    public int updateWhiteboardNameIndexByRid(String rid, int whiteboardNameIndex);
+    @Query(value = "update t_room set display=?3 where rid=?1 and sid=?2", nativeQuery = true)
+    int updateDisplayByRidAndSid(String rid, String sid, String display);
+
+    @Transactional
+    @Modifying
+    @Query(value = "update t_room set whiteboard_name_index=?3 where rid=?1 and sid=?2", nativeQuery = true)
+    int updateWhiteboardNameIndexByRidAndSid(String rid, String sid, int whiteboardNameIndex);
 }

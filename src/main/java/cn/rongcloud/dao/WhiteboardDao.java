@@ -14,23 +14,23 @@ import java.util.List;
  */
 @Repository
 public interface WhiteboardDao extends JpaRepository<Whiteboard, Long> {
-    public List<Whiteboard> findByRid(String rid);
-    public List<Whiteboard> findByRidAndCreator(String rid, String creator);
-    public List<Whiteboard> findByRidAndWbid(String rid, String wbid);
+    List<Whiteboard> findByRidAndSid(String rid, String sid);
+    List<Whiteboard> findByRidAndSidAndCreator(String rid, String sid, String creator);
+    List<Whiteboard> findByRidAndSidAndWbid(String rid, String sid, String wbid);
 
-    public int deleteByRid(String rid);
-
-    @Transactional
-    @Modifying
-    public int deleteByWbid(String wbid);
+    int deleteByRidAndSid(String rid, String sid);
 
     @Transactional
     @Modifying
-    @Query(value = "delete from t_whiteboard where rid=?1 and creator=?2", nativeQuery = true)
-    public int deleteByRidAndCreator(String rid, String creator);
+    int deleteByWbid(String wbid);
 
     @Transactional
     @Modifying
-    @Query(value = "update t_whiteboard set cur_pg=?3 where wbid=?2 and rid=?1", nativeQuery = true)
-    public int updatePageByRidAndWbid(String rid, String wbid, int page);
+    @Query(value = "delete from t_whiteboard where rid=?1 and sid=?2 and creator=?3", nativeQuery = true)
+    int deleteByRidAndSidAndCreator(String rid, String sid, String creator);
+
+    @Transactional
+    @Modifying
+    @Query(value = "update t_whiteboard set cur_pg=?4 where wbid=?3 and rid=?1 and sid=?2", nativeQuery = true)
+    int updatePageByRidAndWbid(String rid, String sid, String wbid, int page);
 }

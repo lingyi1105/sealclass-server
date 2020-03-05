@@ -5,8 +5,6 @@ import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.security.*;
 
 public class SecurityUtils {
@@ -74,4 +72,15 @@ public class SecurityUtils {
 		cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
 		return cipher.doFinal(in);
 	}
+
+//	public static void main(String[] args) {
+//		String password = "superadmin";
+//		String salt = "123456";
+//		try {
+//			String enc = SecurityUtils.byte2hex(SecurityUtils.encryptHMAC(password, salt, SecurityUtils.HmacAlgorithm.HMAC_MD5));
+//			System.out.println(enc);
+//		} catch (Exception e) {
+//
+//		}
+//	}
 }

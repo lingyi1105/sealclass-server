@@ -3,15 +3,13 @@ package cn.rongcloud.job;
 import cn.rongcloud.common.ApiException;
 import cn.rongcloud.common.ErrorEnum;
 import cn.rongcloud.config.RoomProperties;
-import cn.rongcloud.config.WhiteBoardProperties;
-import cn.rongcloud.dao.RoomDao;
-import cn.rongcloud.dao.RoomMemberDao;
 import cn.rongcloud.im.IMHelper;
 import cn.rongcloud.im.message.TicketExpiredMessage;
 import cn.rongcloud.pojo.ScheduledTaskInfo;
-import cn.rongcloud.service.RoomService;
+import cn.rongcloud.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
@@ -19,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -33,22 +32,13 @@ public class ScheduleManager implements SchedulingConfigurer {
     RoomProperties roomProperties;
 
     @Autowired
-    WhiteBoardProperties whiteBoardProperties;
-
-    @Autowired
     IMHelper imHelper;
 
     @Autowired
-    RoomMemberDao roomMemberDao;
-
-    @Autowired
-    RoomDao roomDao;
-
-    @Autowired
-    RoomService roomService;
+    @Lazy
+    UserService userService;
 
     private ConcurrentHashMap<String, ScheduledTask> schedulingTasks = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<String, ScheduledTask> roomCacheTasks = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String, Date> userIMOfflineMap = new ConcurrentHashMap<>();
     private ScheduledDelayTask userIMOfflineKickTask = new ScheduledDelayTask(new Runnable() {
         @Override
@@ -58,7 +48,7 @@ public class ScheduleManager implements SchedulingConfigurer {
                 log.info("userIMOfflineKickTask entry={}, currentTimeMillis={}", entry.getValue().getTime(), currentTimeMillis);
                 if (currentTimeMillis - entry.getValue().getTime() > roomProperties.getUserIMOfflineKickTtl()) {
                     userIMOfflineMap.remove(entry.getKey());
-                    roomService.userIMOfflineKick(entry.getKey());
+                    userService.imOfflineKick(entry.getKey());
                 }
             }
         }
@@ -66,10 +56,8 @@ public class ScheduleManager implements SchedulingConfigurer {
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar scheduledTaskRegistrar) {
-        scheduledTaskRegistrar.scheduleFixedDelayTask(userIMOfflineKickTask);
         this.taskRegistrar = scheduledTaskRegistrar;
-        log.info("config schedule: taskTtl = {}, roomTtl={}, roomMaxCount={}, ", roomProperties.getTaskTtl(), roomProperties.getRoomTtl(), roomProperties.getMaxCount());
-        log.info("config whiteboard: host={}", whiteBoardProperties.getHost());
+        this.taskRegistrar.scheduleFixedDelayTask(userIMOfflineKickTask);
     }
 
     public void userIMOffline(String userId) {
@@ -80,42 +68,28 @@ public class ScheduleManager implements SchedulingConfigurer {
         userIMOfflineMap.remove(userId);
     }
 
-    public void addExpiredTask(RoomService roomService, String roomId) {
-        log.info("addExpiredTask destroyRoom: {}", roomId);
-        ScheduledTask task = taskRegistrar.scheduleFixedDelayTask(new ScheduledDelayTask(new Runnable() {
+    public void addTask(String appkey, String secret, ScheduledTaskInfo task) {
+        log.info("add task: {}", task);
+        schedulingTasks.put(task.getTicket(), Objects.requireNonNull(taskRegistrar.scheduleFixedDelayTask(new ScheduledDelayTask(new Runnable() {
             @Override
             public void run() {
-                ScheduledTask task = roomCacheTasks.remove(roomId);
-                task.cancel();
-                roomService.destroyRoom(roomId);
-
-            }
-        }, roomProperties.getRoomTtl() * 10, roomProperties.getRoomTtl(), null));
-        roomCacheTasks.put(roomId, task);
-    }
-
-    public void addTask(ScheduledTaskInfo task) {
-        log.info("add speech task: {}", task);
-        schedulingTasks.put(task.getTicket(), taskRegistrar.scheduleFixedDelayTask(new ScheduledDelayTask(new Runnable() {
-            @Override
-            public void run() {
-                log.info("speech task expired, execute task: {}", task);
+                log.info("task expired, execute task: {}", task);
                 TicketExpiredMessage msg = new TicketExpiredMessage();
                 msg.setFromUserId(task.getApplyUserId());
                 msg.setToUserId(task.getTargetUserId());
                 msg.setTicket(task.getTicket());
                 try {
-                    imHelper.publishMessage(task.getTargetUserId(), task.getRoomId(), msg);
+                    imHelper.publishMessage(appkey, secret, task.getTargetUserId(), task.getRoomId(), msg);
                 } catch (Exception e) {
                     log.error("msg send error: {}", e.getMessage());
                 }
                 ScheduledTask scheduledTask = schedulingTasks.remove(task.getTicket());
                 scheduledTask.cancel();
             }
-        }, roomProperties.getTaskTtl() * 60, roomProperties.getTaskTtl(), task)));
+        }, roomProperties.getTaskTtl() * 60, roomProperties.getTaskTtl(), task))));
     }
 
-    public ScheduledTaskInfo executeTask(String key) {
+    public ScheduledTaskInfo cancelTask(String key) {
         ScheduledTask scheduledTask = schedulingTasks.remove(key);
         if (scheduledTask == null) {
             log.error("task not exist: key={}", key);
@@ -124,7 +98,7 @@ public class ScheduleManager implements SchedulingConfigurer {
         ScheduledDelayTask task = (ScheduledDelayTask)scheduledTask.getTask();
         ScheduledTaskInfo taskInfo = task.getScheduledTaskInfo();
         scheduledTask.cancel();
-        log.info("execute speech task: {}", taskInfo);
+        log.info("cancel task: {}", taskInfo);
         return taskInfo;
     }
 }

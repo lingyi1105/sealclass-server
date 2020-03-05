@@ -2,6 +2,8 @@ package cn.rongcloud.pojo;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -11,41 +13,34 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "t_room_member")
+@DynamicInsert
+@DynamicUpdate
 public class RoomMember {
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private @Getter @Setter String uid;
     private @Getter @Setter String rid;
+    private @Getter @Setter String sid;
+    private @Getter @Setter String uid;
     private @Getter @Setter int role;
-    private @Getter @Setter Date joinDt;
-    private @Getter @Setter String name;
     private @Getter @Setter boolean camera = true;
     private @Getter @Setter boolean mic = true;
-
-    public RoomMember() {
-    }
-
-    public RoomMember(String uid, String rid) {
-        this.uid = uid;
-        this.rid = rid;
-    }
+    private @Getter @Setter Date joinDt;
 
     @Override
     public String toString() {
         return "RoomMember{" +
-                "uid='" + uid + '\'' +
+                "id=" + id +
                 ", rid='" + rid + '\'' +
+                ", sid='" + sid + '\'' +
+                ", uid='" + uid + '\'' +
                 ", role=" + role +
-                ", joinDt=" + joinDt +
-                ", name='" + name + '\'' +
                 ", camera=" + camera +
                 ", mic=" + mic +
+                ", joinDt=" + joinDt +
                 '}';
     }
-//
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "room_id", referencedColumnName = "rid")
-//    private @Getter @Setter Room room;
 }

@@ -26,13 +26,13 @@ public class WhiteBoardHelper {
     @Autowired
     IMProperties imProperties;
 
-    public WhiteBoardApiResultInfo create(String roomId) throws Exception {
+    public WhiteBoardApiResultInfo create(String appkey, String roomId) throws Exception {
         if (roomId == null) {
             throw new IllegalArgumentException("Paramer 'roomId' is required");
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append("&appId=").append(URLEncoder.encode(imProperties.getAppKey(), UTF8));
+        sb.append("&appId=").append(URLEncoder.encode(appkey, UTF8));
         sb.append("&roomNr=").append(URLEncoder.encode(roomId, UTF8));
         HttpURLConnection connection= httpHelper.createWhiteBoardPostHttpConnection(whiteBoardProperties.getHost(), "/room/create", "application/x-www-form-urlencoded");
         httpHelper.setBodyParameter(sb, connection);
@@ -40,13 +40,13 @@ public class WhiteBoardHelper {
         return JSON.parseObject(httpHelper.returnResult(connection, sb.toString()), WhiteBoardApiResultInfo.class);
     }
 
-    public WhiteBoardApiResultInfo destroy(String roomId) throws Exception {
+    public WhiteBoardApiResultInfo destroy(String appkey, String roomId) throws Exception {
         if (roomId == null) {
             throw new IllegalArgumentException("Paramer 'roomId' is required");
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append("&appId=").append(URLEncoder.encode(imProperties.getAppKey(), UTF8));
+        sb.append("&appId=").append(URLEncoder.encode(appkey, UTF8));
         sb.append("&roomNr=").append(URLEncoder.encode(roomId, UTF8));
         HttpURLConnection connection= httpHelper.createWhiteBoardPostHttpConnection(whiteBoardProperties.getHost(), "/room/destroy", "application/x-www-form-urlencoded");
         httpHelper.setBodyParameter(sb, connection);

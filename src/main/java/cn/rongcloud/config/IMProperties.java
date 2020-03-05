@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "cn.rongcloud.im")
 public class IMProperties {
-    private String appKey;
-    private String secret;
+//    private String appKey;
+//    private String secret;
     private String host;
 }

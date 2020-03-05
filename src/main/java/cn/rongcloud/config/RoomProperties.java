@@ -13,6 +13,6 @@ import org.springframework.stereotype.Component;
 public class RoomProperties {
     private int maxCount;
     private long taskTtl;
-    private long roomTtl;
+//    private long roomTtl;
     private long userIMOfflineKickTtl;
 }

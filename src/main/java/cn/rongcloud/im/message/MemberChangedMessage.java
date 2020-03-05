@@ -14,24 +14,21 @@ public class MemberChangedMessage extends BaseMessage {
     public final static int Action_Join = 1;
     public final static int Action_Leave = 2;
     public final static int Action_Kick = 3;
+    public final static int Action_Destroy = 4;
 
-    @Getter @Setter private int action;
-
-    @Getter @Setter private String userId;
-    @Getter @Setter private String userName;
-    @Getter @Setter private boolean camera;
-    @Getter @Setter private boolean microphone;
-
+    private @Getter @Setter int action;
+    private @Getter @Setter String schoolId;
+    private @Getter @Setter String roomId;
+    private @Getter @Setter String userId;
+    private @Getter @Setter String userName;
+    private @Getter @Setter boolean camera;
+    private @Getter @Setter boolean microphone;
     private @Getter @Setter int role;
-
     private @Getter @Setter Date timestamp;
 
-    public MemberChangedMessage(int action, String userId, int role) {
+    public MemberChangedMessage(int action, String userId) {
         this.action = action;
         this.userId = userId;
-        this.role = role;
-        this.camera = true;
-        this.microphone = true;
     }
 
     @Override

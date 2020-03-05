@@ -14,53 +14,31 @@ import java.util.List;
  */
 @Repository
 public interface RoomMemberDao extends JpaRepository<RoomMember, Long> {
-    public List<RoomMember> findByRid(String rid);
-
-    public List<RoomMember> findByRidAndUid(String rid, String uid);
-
-    public List<RoomMember> findByRidAndRole(String rid, int role);
-
-    public List<RoomMember> findByUid(String uid);
-
-    public int countByRidAndRole(String rid, int role);
+    List<RoomMember> findByRidAndSid(String rid, String sid);
+    List<RoomMember> findByRidAndSidAndUid(String rid, String sid, String uid);
+    List<RoomMember> findByUid(String uid);
+    List<RoomMember> findByRidAndSidAndRole(String rid, String sid, int role);
+    boolean existsByRidAndSidAndUid(String rid, String sid, String uid);
 
     @Modifying
     @Transactional
-    public int deleteByRid(String roomId);
+    public int deleteByRidAndSid(String rid, String sid);
 
-    @Query(value = "select count(*) from t_room_member where rid=?1", nativeQuery = true)
-    public int countByRid(String roomId);
-
-    @Query(value = "select count(*) from t_room_member where rid=?1 and role!=?2", nativeQuery = true)
-    public int countByRidAndExcludeRole(String roomId, int excludeRole);
+    @Query(value = "select count(*) from t_room_member where rid=?1 and sid=?2", nativeQuery = true)
+    int countByRidAndSid(String rid, String sid);
 
     @Transactional
     @Modifying
-    @Query(value = "delete from t_room_member where rid=?1 and uid=?2", nativeQuery = true)
-    public int deleteUserByRidAndUid(String rid, String uid);
+    @Query(value = "delete from t_room_member where rid=?1 and sid=?2 and uid=?3", nativeQuery = true)
+    int deleteUserByRidAndSidAndUid(String rid, String sid, String uid);
 
     @Transactional
     @Modifying
-    @Query(value = "update t_room_member set role=?3 where rid=?1 and uid=?2", nativeQuery = true)
-    public int updateRoleByRidAndUid(String rid, String uid, int role);
+    @Query(value = "update t_room_member set camera=?4 where rid=?1 and sid=?2 and uid=?3", nativeQuery = true)
+    int updateCameraByRidAndSidAndUid(String rid, String sid, String uid, boolean camera);
 
     @Transactional
     @Modifying
-    @Query(value = "update t_room_member set role=?3 where rid=?1 and role=?2", nativeQuery = true)
-    public int updateRoleByRidAndRole(String rid, int role);
-
-    @Transactional
-    @Modifying
-    @Query(value = "update t_room_member set camera=?3 where rid=?1 and uid=?2", nativeQuery = true)
-    public int updateCameraByRidAndUid(String rid, String uid, boolean camera);
-
-    @Transactional
-    @Modifying
-    @Query(value = "update t_room_member set mic=?3 where rid=?1 and uid=?2", nativeQuery = true)
-    public int updateMicByRidAndUid(String rid, String uid, boolean mic);
-
-    public boolean existsByRidAndUid(String rid, String uid);
-
-    public boolean existsByRidAndRole(String rid, int role);
-
+    @Query(value = "update t_room_member set mic=?4 where rid=?1 and sid=?2 and uid=?3", nativeQuery = true)
+    int updateMicByRidAndSidAndUid(String rid, String sid, String uid, boolean mic);
 }
