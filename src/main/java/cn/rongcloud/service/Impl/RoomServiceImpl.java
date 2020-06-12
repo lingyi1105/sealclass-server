@@ -4,6 +4,7 @@ import cn.rongcloud.common.*;
 import cn.rongcloud.config.RoomProperties;
 import cn.rongcloud.config.WhiteBoardProperties;
 import cn.rongcloud.dao.*;
+import cn.rongcloud.enums.WhiteBoardType;
 import cn.rongcloud.im.IMHelper;
 import cn.rongcloud.im.message.*;
 import cn.rongcloud.job.ScheduleManager;
@@ -14,10 +15,13 @@ import cn.rongcloud.service.UserService;
 import cn.rongcloud.utils.CheckUtils;
 import cn.rongcloud.utils.DateTimeUtils;
 import cn.rongcloud.utils.IdentifierUtils;
+import cn.rongcloud.whiteboard.HereWhiteHelper;
 import cn.rongcloud.whiteboard.WhiteBoardHelper;
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +48,9 @@ public class RoomServiceImpl implements RoomService {
 
     @Autowired
     private WhiteBoardHelper whiteBoardHelper;
+
+    @Autowired
+    private HereWhiteHelper hereWhiteHelper;
 
     @Autowired
     private WhiteboardDao whiteboardDao;
@@ -261,7 +268,7 @@ public class RoomServiceImpl implements RoomService {
 
         List<Whiteboard> whiteboardList = whiteboardDao.findByRidAndSid(roomId, schoolId);
         for (Whiteboard wb : whiteboardList) {
-            whiteBoardHelper.destroy(jwtUser.getAppkey(), wb.getWbRoom());
+            remoteDestroyWhiteBoard(jwtUser.getAppkey(), wb.getWbRoom(), wb.getWbid());
         }
         whiteboardDao.deleteByRidAndSid(roomId, schoolId);
 
@@ -354,13 +361,24 @@ public class RoomServiceImpl implements RoomService {
                 display = "display://type=" + type + "?userId=" + userId + "?uri=";
                 break;
             case WhiteBoard:
-                if (StringUtils.isBlank(uri)) {
+                if (whiteBoardProperties.getType() == WhiteBoardType.RONGCLOUD.getType() && StringUtils.isBlank(uri)) {
                     throw new ApiException(ErrorEnum.ERR_REQUEST_PARA_ERR, "uri must't be null");
                 }
-                if (whiteboardDao.findByRidAndSidAndWbid(roomId, jwtUser.getSchoolId(), uri).isEmpty()) {
-                    throw new ApiException(ErrorEnum.ERR_REQUEST_PARA_ERR, "whiteboard not exist");
+                if (whiteBoardProperties.getType() == WhiteBoardType.RONGCLOUD.getType()) {
+                    if (whiteboardDao.findByRidAndSidAndWbid(roomId, jwtUser.getSchoolId(), uri).isEmpty()) {
+                        throw new ApiException(ErrorEnum.ERR_REQUEST_PARA_ERR, "whiteboard not exist");
+                    }
+                    display = getWhiteBoardDisplay("", uri, null);
+                } else if (whiteBoardProperties.getType() == WhiteBoardType.HEREWHITW.getType()) {
+                    List<Whiteboard> whiteboards = whiteboardDao.findByRidAndSid(roomId, jwtUser.getSchoolId());
+                    if (whiteboards.isEmpty()) {
+                        throw new ApiException(ErrorEnum.ERR_REQUEST_PARA_ERR, "whiteboard not exist");
+                    }
+                    Whiteboard whiteboard = whiteboards.get(0);
+                    display = getWhiteBoardDisplay("", whiteboard.getWbid(), whiteboard.getWbRoomToken());
+                } else {
+                    display = "";
                 }
-                display = "display://type=" + type + "?userId=" + "?uri=" + uri;
                 break;
             case Screen:
                 display = "display://type=" + type + "?userId=" + userId + "?uri=";
@@ -370,7 +388,7 @@ public class RoomServiceImpl implements RoomService {
                 display = "";
                 break;
         }
-        imHelper.publishMessage(jwtUser.getAppkey(), jwtUser.getSecret(), jwtUser.getUserId(), roomId, new DisplayMessage(display));
+        imHelper.publishMessage(jwtUser.getAppkey(), jwtUser.getSecret(), jwtUser.getUserId(), roomId, new DisplayMessage(display), 1);
         roomDao.updateDisplayByRidAndSid(roomId, schoolId, display);
 
         log.info("jwtUser {} display {} in room={}, schoolId={}, type={}, uri={}", jwtUser, display, roomId, schoolId, type, uri);
@@ -379,9 +397,8 @@ public class RoomServiceImpl implements RoomService {
 
     @DeclarePermissions(RoleEnum.RoleTeacher)
     @Override
-    public String createWhiteBoard(JwtUser jwtUser, String roomId, String schoolId) throws ApiException, Exception {
+    public WhiteboardInfo createWhiteBoard(JwtUser jwtUser, String roomId, String schoolId) throws ApiException, Exception {
         log.info("createWhiteBoard: jwtUser={}, roomId ={}, schoolId={}", jwtUser, roomId, schoolId);
-
         List<Room> roomList = roomDao.findByRidAndSid(roomId, schoolId);
         if (roomList.isEmpty()) {
             log.error("room:{}, schoolId:{} not exist", roomId, schoolId);
@@ -399,27 +416,27 @@ public class RoomServiceImpl implements RoomService {
         String wbRoom = IdentifierUtils.uuid();
         Date date = DateTimeUtils.currentUTC();
 
-        WhiteBoardApiResultInfo resultInfo = whiteBoardHelper.create(jwtUser.getAppkey(), wbRoom);
-        if (!resultInfo.isSuccess()) {
-            throw new ApiException(ErrorEnum.ERR_CREATE_WHITE_BOARD, resultInfo.getMsg());
-        }
-        String wbId = resultInfo.getData();
-        wbId = wbId.replace(whiteBoardProperties.getOrigin(), whiteBoardProperties.getReplace());
-
         int whiteboardNameIndex = room.getWhiteboardNameIndex() + 1;
         String name = "白板" + whiteboardNameIndex;
+        WhiteboardInfo resultInfo = remoteCreateWhiteBoard(jwtUser.getAppkey(), wbRoom, name);
+
         roomDao.updateWhiteboardNameIndexByRidAndSid(roomId, schoolId, whiteboardNameIndex);
 
-        WhiteboardMessage wbmsg = new WhiteboardMessage(WhiteboardMessage.Create);
-        wbmsg.setWhiteboardId(wbId);
-        wbmsg.setWhiteboardName(name);
-        imHelper.publishMessage(jwtUser.getAppkey(), jwtUser.getSecret(), jwtUser.getUserId(), roomId, wbmsg);
+        if (whiteBoardProperties.getType() == WhiteBoardType.RONGCLOUD.getType()) {
+            // 当白板服务为融云白板时，才需要发送此通知
+            WhiteboardMessage wbmsg = new WhiteboardMessage(WhiteboardMessage.Create);
+            wbmsg.setWhiteboardId(resultInfo.getId());
+            wbmsg.setWhiteboardName(name);
+            wbmsg.setWhiteboardType(WhiteBoardType.RONGCLOUD.getType());
+            imHelper.publishMessage(jwtUser.getAppkey(), jwtUser.getSecret(), jwtUser.getUserId(), roomId, wbmsg);
+        }
 
         Whiteboard wb = new Whiteboard();
         wb.setRid(roomId);
         wb.setSid(schoolId);
         wb.setWbRoom(wbRoom);
-        wb.setWbid(wbId);
+        wb.setWbid(resultInfo.getId());
+        wb.setWbRoomToken(resultInfo.getRoomToken());
         wb.setName(name);
         wb.setCreator(jwtUser.getUserId());
         wb.setCurPg(0);
@@ -427,11 +444,44 @@ public class RoomServiceImpl implements RoomService {
         wb.setUpdateDt(date);
         whiteboardDao.save(wb);
 
-        String display = "display://type=" + DisplayEnum.WhiteBoard.getValue() + "?userId=" + jwtUser.getUserId() + "?uri=" + wbId;
+        String display = getWhiteBoardDisplay(jwtUser.getUserId(), resultInfo.getId(), resultInfo.getRoomToken());
         imHelper.publishMessage(jwtUser.getAppkey(), jwtUser.getSecret(), jwtUser.getUserId(), roomId, new DisplayMessage(display), 1);
         roomDao.updateDisplayByRidAndSid(roomId, schoolId, display);
 
-        return wbId;
+        return resultInfo;
+    }
+    
+    private String getWhiteBoardDisplay(String userId, String wbId, String wbRoomToken){
+        String display = "display://type=" + DisplayEnum.WhiteBoard.getValue() + "?whiteboardType=" + whiteBoardProperties.getType() + "?userId=" + userId;
+        if (whiteBoardProperties.getType() == WhiteBoardType.RONGCLOUD.getType()) {
+            display = display + "?uri=" + wbId;
+        } else if (whiteBoardProperties.getType() == WhiteBoardType.HEREWHITW.getType()) {
+            display = display + "?whiteboardId=" + wbId + "?whiteboardRoomToken=" + wbRoomToken;
+        }
+        return display;
+    }
+
+    private WhiteboardInfo remoteCreateWhiteBoard(String appKey, String roomId, String name)
+        throws Exception {
+        WhiteboardInfo wbInfo = new WhiteboardInfo();
+        if (whiteBoardProperties.getType() == WhiteBoardType.RONGCLOUD.getType()) {
+            WhiteBoardApiResultInfo resultInfo = whiteBoardHelper.create(appKey, roomId);
+            if (!resultInfo.isSuccess()) {
+                throw new ApiException(ErrorEnum.ERR_CREATE_WHITE_BOARD, resultInfo.getMsg());
+            }
+            String wbId = resultInfo.getData();
+            wbId = wbId.replace(whiteBoardProperties.getOrigin(), whiteBoardProperties.getReplace());
+            wbInfo.setId(wbId);
+        } else if (whiteBoardProperties.getType() == WhiteBoardType.HEREWHITW.getType()){
+            HereWhiteApiResultInfo resultInfo = hereWhiteHelper.create(name);
+            if (!resultInfo.isSuccess()) {
+                throw new ApiException(ErrorEnum.ERR_CREATE_WHITE_BOARD);
+            }
+            wbInfo.setId(resultInfo.getMsg().getRoom().getUuid());
+            wbInfo.setRoomToken(resultInfo.getMsg().getRoomToken());
+        }
+        wbInfo.setType(whiteBoardProperties.getType());
+        return wbInfo;
     }
 
     @DeclarePermissions(RoleEnum.RoleTeacher)
@@ -439,7 +489,13 @@ public class RoomServiceImpl implements RoomService {
     public Boolean deleteWhiteboard(JwtUser jwtUser, String roomId, String schoolId, String whiteBoardId) throws ApiException, Exception {
         log.info("deleteWhiteboard: jwtUser={}, roomId={}, schoolId={}, whiteBoardId={}", jwtUser, roomId, schoolId, whiteBoardId);
 
-        List<Whiteboard> whiteboardList = whiteboardDao.findByRidAndSidAndWbid(roomId, schoolId, whiteBoardId);
+        List<Whiteboard> whiteboardList = new ArrayList<>();
+        if (whiteBoardProperties.getType() == WhiteBoardType.RONGCLOUD.getType()) {
+            whiteboardList = whiteboardDao.findByRidAndSidAndWbid(roomId, schoolId, whiteBoardId);
+        }
+        if (whiteBoardProperties.getType() == WhiteBoardType.HEREWHITW.getType()) {
+            whiteboardList = whiteboardDao.findByRidAndSid(roomId, schoolId);
+        }
         if (whiteboardList.isEmpty()) {
             throw new ApiException(ErrorEnum.ERR_WHITE_BOARD_NOT_EXIST);
         }
@@ -450,24 +506,42 @@ public class RoomServiceImpl implements RoomService {
         }
         Room room = roomList.get(0);
 
-        if (room.getDisplay().contains("uri=" + whiteBoardId)) {
+        Whiteboard whiteboard = whiteboardList.get(0);
+        whiteBoardId = whiteboard.getWbid();
+        remoteDestroyWhiteBoard(jwtUser.getAppkey(), whiteboard.getWbRoom(), whiteBoardId);
+
+        if (room.getDisplay().contains("uri=" + whiteBoardId) || room.getDisplay().contains("whiteboardId=" + whiteBoardId)) {
             String display = "";
             roomDao.updateDisplayByRidAndSid(roomId, jwtUser.getSchoolId(), display);
             imHelper.publishMessage(jwtUser.getAppkey(), jwtUser.getSecret(), jwtUser.getUserId(), roomId,  new DisplayMessage(display), 1);
         }
 
-        String wbRoom = whiteboardList.get(0).getWbRoom();
-        WhiteBoardApiResultInfo resultInfo = whiteBoardHelper.destroy(jwtUser.getAppkey(), wbRoom);
-        if (!resultInfo.isSuccess()) {
-            throw new ApiException(ErrorEnum.ERR_DELETE_WHITE_BOARD, resultInfo.getMsg());
+        whiteboardDao.deleteByWbid(whiteBoardId);
+
+        if (whiteBoardProperties.getType() == WhiteBoardType.RONGCLOUD.getType()) {
+            // 当白板服务为融云白板时，才需要发送此通知
+            WhiteboardMessage wbmsg = new WhiteboardMessage(WhiteboardMessage.Delete);
+            wbmsg.setWhiteboardId(whiteBoardId);
+            wbmsg.setWhiteboardType(WhiteBoardType.RONGCLOUD.getType());
+            imHelper.publishMessage(jwtUser.getAppkey(), jwtUser.getSecret(), jwtUser.getUserId(), roomId, wbmsg, 1);
         }
 
-        whiteboardDao.deleteByWbid(whiteBoardId);
-        WhiteboardMessage wbmsg = new WhiteboardMessage(WhiteboardMessage.Delete);
-        wbmsg.setWhiteboardId(whiteBoardId);
-        imHelper.publishMessage(jwtUser.getAppkey(), jwtUser.getSecret(), jwtUser.getUserId(), roomId, wbmsg, 1);
-
         return Boolean.TRUE;
+    }
+
+    private void remoteDestroyWhiteBoard(String appKey, String roomId, String wbId)
+        throws Exception {
+        if (whiteBoardProperties.getType() == WhiteBoardType.RONGCLOUD.getType()) {
+            WhiteBoardApiResultInfo resultInfo = whiteBoardHelper.destroy(appKey, roomId);
+            if (!resultInfo.isSuccess()) {
+                throw new ApiException(ErrorEnum.ERR_DELETE_WHITE_BOARD, resultInfo.getMsg());
+            }
+        } else if (whiteBoardProperties.getType() == WhiteBoardType.HEREWHITW.getType()) {
+            HereWhiteApiResultInfo resultInfo = hereWhiteHelper.banRoom(true, wbId);
+            if (!resultInfo.isSuccess()) {
+                throw new ApiException(ErrorEnum.ERR_DELETE_WHITE_BOARD);
+            }
+        }
     }
 
     @Override

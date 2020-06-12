@@ -5,14 +5,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * Created by weiqinxiao on 2019/2/28.
+ * Created by sunyinglong on 2020/4/20.
  */
 @Data
 @Component
-@ConfigurationProperties(prefix = "cn.rongcloud.whiteboard")
-public class WhiteBoardProperties {
+@ConfigurationProperties(prefix = "cn.rongcloud.whiteboard.herewhite")
+public class HereWhiteProperties {
     private String host;
-    private String origin;
-    private String replace;
-    private Integer type;
+    private String token;
 }

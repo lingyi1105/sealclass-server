@@ -18,7 +18,7 @@ public interface RoomService {
 
     Boolean display(JwtUser jwtUser, String roomId, String schoolId, int type, String userId, String uri) throws ApiException, Exception;
 
-    String createWhiteBoard(JwtUser jwtUser, String roomId, String schoolId) throws ApiException, Exception;
+    WhiteboardInfo createWhiteBoard(JwtUser jwtUser, String roomId, String schoolId) throws ApiException, Exception;
     Boolean deleteWhiteboard(JwtUser jwtUser, String roomId, String schoolId, String whiteBoardId) throws ApiException, Exception;
     List<WhiteboardResult> getWhiteboard(JwtUser jwtUser, String roomId, String schoolId) throws ApiException, Exception;
     Boolean turnWhiteBoardPage(JwtUser jwtUser, String roomId, String schoolId, String whiteBoardId, int page) throws ApiException, Exception;

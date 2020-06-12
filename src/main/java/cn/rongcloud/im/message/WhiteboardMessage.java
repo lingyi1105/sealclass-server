@@ -16,6 +16,7 @@ public class WhiteboardMessage extends BaseMessage {
 
     private @Setter @Getter String whiteboardId;
     private @Setter @Getter String whiteboardName;
+    private @Setter @Getter Integer whiteboardType;
 
     public WhiteboardMessage(int action) {
         this.action = action;

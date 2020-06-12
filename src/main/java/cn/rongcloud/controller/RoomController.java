@@ -104,11 +104,11 @@ public class RoomController {
 
     @ApiOperation(value = "新建白板", notes = "仅老师能操作")
     @RequestMapping(value = "/whiteboard/create", method = RequestMethod.POST)
-    public BaseResponse<String> createWhiteBoard(@RequestBody @Validated ReqRoomIdData data,
+    public BaseResponse<WhiteboardInfo> createWhiteBoard(@RequestBody @Validated ReqRoomIdData data,
                                                  @ApiIgnore @RequestAttribute(value = JwtFilter.JWT_AUTH_DATA) JwtUser jwtUser)
             throws ApiException, Exception {
-        String result = roomService.createWhiteBoard(jwtUser, data.getRoomId(), jwtUser.getSchoolId());
-        return new BaseResponse<>(result);
+        WhiteboardInfo result = roomService.createWhiteBoard(jwtUser, data.getRoomId(), jwtUser.getSchoolId());
+        return new BaseResponse<WhiteboardInfo>(result);
     }
 
     @ApiOperation(value = "删除白板", notes = "仅老师能操作")

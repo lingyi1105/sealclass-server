@@ -27,6 +27,7 @@ public class Whiteboard implements Serializable {
     private @Getter @Setter String sid;
     private @Getter @Setter String wbRoom;
     private @Getter @Setter String wbid;
+    private @Getter @Setter String wbRoomToken;
     private @Getter @Setter String name;
     private @Getter @Setter String creator;
     private @Getter @Setter int pgCount;
@@ -42,6 +43,7 @@ public class Whiteboard implements Serializable {
                 ", sid='" + sid + '\'' +
                 ", wbRoom='" + wbRoom + '\'' +
                 ", wbid='" + wbid + '\'' +
+                ", wbRoomToken='" + wbRoomToken + '\'' +
                 ", name='" + name + '\'' +
                 ", creator='" + creator + '\'' +
                 ", pgCount=" + pgCount +

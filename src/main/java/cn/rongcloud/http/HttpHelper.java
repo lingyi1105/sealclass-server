@@ -118,6 +118,24 @@ public class HttpHelper {
         return conn;
     }
 
+    public HttpURLConnection netlessWBPostHttpConnection(String host, String uri, String contentType, String token)
+        throws MalformedURLException, IOException, ProtocolException {
+
+        URL url = new URL(host + uri);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setUseCaches(false);
+        conn.setDoInput(true);
+        conn.setDoOutput(true);
+        conn.setRequestMethod("POST");
+        conn.setInstanceFollowRedirects(true);
+        conn.setConnectTimeout(30000);
+        conn.setReadTimeout(30000);
+        conn.setRequestProperty("token", token);
+        conn.setRequestProperty("Content-Type", contentType);
+
+        return conn;
+    }
+
     public HttpURLConnection createCommonPostHttpConnection(String host, String appKey, String appSecret, String uri, String contentType)
         throws MalformedURLException, IOException, ProtocolException {
         String nonce = String.valueOf(Math.random() * 1000000);
