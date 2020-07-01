@@ -14,7 +14,7 @@
 * 若您开启了 HTTPS，目前项目中默认使用的是 [sealclass.key](https://github.com/rongcloud/sealclass-server/blob/v2.0/src/main/resources/sealclass.key) 自签证书，Web 端需要添加信任，可以替换成您的正式证书
 * 去融云官网注册、申请 AppKey 和 Secret
 * 去 [herewhite官网](https://herewhite.com) 申请白板所需 Token，然后将其配置到 `application.properties` 文件中，配置项为 `cn.rongcloud.whiteboard.herewhite.token=xxx` 
-* 启动服务之后，调用 `Http POST http://localhost:9999/school/create` 创建学校，客户端使用生成的 schoolId 使用。
+* 启动服务之后，调用 `Http POST http://localhost:9999/api/v2/school/create` 创建学校，客户端使用生成的 schoolId。
 ```json
 {
   "appkey": "rongcloud appkey",
